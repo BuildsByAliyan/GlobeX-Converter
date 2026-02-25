@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+  <title>GlobeX — Precision Currency Intelligence</title>
+  <meta name="description" content="Institutional-grade currency conversion. 170+ global currencies. Market-leading rates." />
+  <link rel="canonical" href="https://codewithaliyan.github.io/GlobeX-Converter/" />
+  <link rel="icon" type="image/png" href="../image/logo.png" />
+  <link rel="shortcut icon" type="image/png" href="../image/logo.png" />
+  <link rel="apple-touch-icon" href="../image/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ================================================================
+       DESIGN TOKENS — Obsidian × Electric Gold
+    ================================================================ */
+    :root {
+      --void:         #070810;
+      --deep:         #0a0b14;
+      --surface:      #0d0f1c;
+      --card-bg:      rgba(13, 17, 38, 0.78);
+      --input-bg:     rgba(255,255,255,0.042);
+      --dropdown-bg:  #090b18;
+
+      /* Gold */
+      --gold:         #c8a84b;
+      --gold-lt:      #e0c06e;
+      --gold-dim:     rgba(200,168,75,0.14);
+      --gold-glow:    rgba(200,168,75,0.22);
+      --gold-border:  rgba(200,168,75,0.20);
+      --gold-focus:   rgba(200,168,75,0.10);
+
+      /* Electric blue accent */
+      --blue:         #4fa8e8;
+      --blue-dim:     rgba(79,168,232,0.09);
+      --blue-border:  rgba(79,168,232,0.18);
+
+      /* Mint for results */
+      --mint:         #50d4a8;
+      --mint-dim:     rgba(80,212,168,0.07);
+      --mint-border:  rgba(80,212,168,0.18);
+
+      /* Text hierarchy */
+      --t1: #eeeae4;
+      --t2: rgba(238,234,228,0.52);
+      --t3: rgba(238,234,228,0.24);
+
+      /* Structural */
+      --line:     rgba(255,255,255,0.065);
+      --line-act: rgba(200,168,75,0.45);
+
+      /* Geometry */
+      --r-card:  18px;
+      --r-input: 11px;
+      --r-btn:   11px;
+
+      /* Motion */
+      --ease: cubic-bezier(0.4,0,0.2,1);
+      --tf:   0.16s;
+      --tm:   0.24s;
+
+      /* Fonts */
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans:  'DM Sans', system-ui, sans-serif;
+      --mono:  'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--sans);
+      background: var(--void);
+      color: var(--t1);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ── Background layers ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at -10% -5%, rgba(200,168,75,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 110% 105%, rgba(79,168,232,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 30% at 50% 90%, rgba(80,212,168,0.04) 0%, transparent 60%),
+        var(--deep);
+    }
+    /* Fine grid texture */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    header, main, footer { position: relative; z-index: 1; }
+
+    /* ── Ambient orbs ── */
+    .orb {
+      position: fixed; border-radius: 50%; pointer-events: none;
+      z-index: 0; filter: blur(100px); opacity: 0.09;
+      animation: orbDrift linear infinite alternate;
+    }
+    .orb-a { width: 320px; height: 320px; background: radial-gradient(circle, var(--gold) 0%, transparent 70%); top: -80px; left: -80px; animation-duration: 20s; }
+    .orb-b { width: 240px; height: 240px; background: radial-gradient(circle, var(--blue) 0%, transparent 70%); bottom: -60px; right: -60px; animation-duration: 28s; animation-delay: -12s; }
+    .orb-c { width: 180px; height: 180px; background: radial-gradient(circle, var(--mint) 0%, transparent 70%); top: 55%; left: 30%; animation-duration: 35s; animation-delay: -6s; opacity: 0.05; }
+    @keyframes orbDrift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(22px,36px) scale(1.06); }
+    }
+
+    /* ── Layout ── */
+    .wrap { width: 100%; max-width: 430px; margin-inline: auto; padding-inline: 18px; }
+
+    /* ================================================================
+       HEADER
+    ================================================================ */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      padding-top: env(safe-area-inset-top);
+      background: rgba(7,8,16,0.90);
+      backdrop-filter: blur(24px) saturate(1.4);
+      -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner {
+      max-width: 430px; margin-inline: auto;
+      padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .logo-link {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .logo-link img {
+      width: 28px; height: 28px; object-fit: contain;
+      filter: drop-shadow(0 0 7px var(--gold-glow));
+    }
+    .brand {
+      font-family: var(--serif); font-size: 1.15rem; font-weight: 700;
+      color: var(--t1); letter-spacing: 0.2px;
+    }
+    .brand span { color: var(--gold-lt); }
+
+    .live-pill {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 12px; border-radius: 30px;
+      background: rgba(80,212,168,0.07); border: 1px solid rgba(80,212,168,0.18);
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 1.1px; text-transform: uppercase;
+      color: var(--mint); white-space: nowrap; flex-shrink: 0;
+    }
+    .pulse {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--mint);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(80,212,168,0.8); }
+      55%      { box-shadow: 0 0 0 5px rgba(80,212,168,0); }
+    }
+
+    /* ================================================================
+       HERO
+    ================================================================ */
+    .hero {
+      padding: 26px 18px 12px; text-align: center;
+      animation: slideUp 0.55s var(--ease) both;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.63rem; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase;
+      color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-border);
+      border-radius: 30px; padding: 4px 13px; margin-bottom: 11px;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 7.5vw, 2.5rem);
+      font-weight: 700; line-height: 1.12; margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      background: linear-gradient(115deg, var(--gold-lt) 0%, var(--gold) 55%, #9a6e20 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub { font-size: 0.82rem; color: var(--t2); line-height: 1.65; }
+
+    /* ================================================================
+       CONVERTER CARD — Glassmorphism
+    ================================================================ */
+    .converter-section { flex: 1; padding: 12px 18px 20px; }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(28px) saturate(1.4);
+      -webkit-backdrop-filter: blur(28px) saturate(1.4);
+      border: 1px solid var(--line);
+      border-top-color: rgba(255,255,255,0.09);
+      border-left-color: rgba(255,255,255,0.06);
+      border-radius: var(--r-card);
+      padding: 20px 17px 18px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.028) inset,
+        0 40px 72px rgba(0,0,0,0.58),
+        0 8px 24px rgba(0,0,0,0.32);
+      animation: slideUp 0.55s 0.08s var(--ease) both;
+      /* Subtle top edge highlight */
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(200,168,75,0.4) 40%, rgba(79,168,232,0.25) 70%, transparent 100%);
+    }
+
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px; gap: 8px;
+    }
+    .card-brand { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 0; }
+    .card-brand img {
+      width: 22px; height: 22px; object-fit: contain;
+      filter: drop-shadow(0 0 5px var(--gold-glow)); flex-shrink: 0;
+    }
+    .card-brand-name {
+      font-family: var(--serif); font-size: 0.9rem; font-weight: 700;
+      color: var(--t1); white-space: nowrap;
+    }
+    .card-brand-name span { color: var(--gold-lt); }
+
+    .rate-pill {
+      font-family: var(--mono); font-size: 0.64rem; color: var(--blue);
+      background: var(--blue-dim); border: 1px solid var(--blue-border);
+      border-radius: 7px; padding: 4px 9px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex-shrink: 1; min-width: 0;
+    }
+
+    /* Field labels */
+    .f-label {
+      display: block; font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--t3);
+      margin-bottom: 7px;
+    }
+
+    /* ── Amount input ── */
+    .amount-group { margin-bottom: 13px; }
+    .amount-wrap  { position: relative; display: flex; align-items: center; }
+
+    .amount-input {
+      width: 100%;
+      background: var(--input-bg); border: 1px solid var(--line);
+      border-radius: var(--r-input);
+      padding: 0 58px 0 16px; min-height: 54px;
+      font-family: var(--mono); font-size: 1.15rem; font-weight: 500;
+      color: var(--t1); outline: none;
+      transition: border-color var(--tm) var(--ease), box-shadow var(--tm) var(--ease), background var(--tm) var(--ease);
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    .amount-input::-webkit-outer-spin-button,
+    .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .amount-input::placeholder { color: var(--t3); font-size: 0.92rem; }
+    .amount-input:focus {
+      border-color: var(--line-act);
+      background: rgba(200,168,75,0.038);
+      box-shadow: 0 0 0 3px var(--gold-focus);
+    }
+    .amount-badge {
+      position: absolute; right: 14px;
+      font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.4px; pointer-events: none;
+    }
+
+    /* ── Currency row: [FROM] [swap] [TO] ── */
+    .currency-row {
+      display: grid;
+      grid-template-columns: 1fr 42px 1fr;
+      align-items: end;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .csel-wrap { position: relative; }
+    .currency-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+    .sel-trigger {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--input-bg); border: 1px solid var(--line);
+      border-radius: var(--r-input);
+      padding: 0 11px; min-height: 50px;
+      cursor: pointer;
+      transition: border-color var(--tm) var(--ease), background var(--tm) var(--ease), box-shadow var(--tm) var(--ease);
+      user-select: none; -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+    }
+    .sel-trigger:hover  { border-color: rgba(255,255,255,0.13); }
+    .sel-trigger.open   {
+      border-color: var(--line-act);
+      background: rgba(200,168,75,0.046);
+      box-shadow: 0 0 0 3px var(--gold-focus);
+      border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+    }
+    .sel-trigger .flag  { width: 20px; height: 14px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+    .sel-trigger .code  {
+      flex: 1; font-family: var(--mono); font-size: 0.86rem; font-weight: 600;
+      color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sel-trigger .arrow { font-size: 0.48rem; color: var(--t3); transition: transform var(--tm) var(--ease); flex-shrink: 0; }
+    .sel-trigger.open .arrow { transform: rotate(180deg); }
+
+    .sel-opts {
+      display: none;
+      position: absolute; top: calc(100% - 1px); left: 0; right: 0; z-index: 500;
+      list-style: none;
+      background: var(--dropdown-bg);
+      border: 1px solid var(--line-act); border-top: none;
+      border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
+      max-height: 195px; overflow-y: auto; overscroll-behavior: contain;
+      box-shadow: 0 24px 52px rgba(0,0,0,0.72);
+    }
+    .sel-opts.active { display: block; }
+    .sel-opts li {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 11px;
+      font-family: var(--mono); font-size: 0.77rem;
+      color: var(--t2); cursor: pointer; transition: background var(--tf);
+    }
+    .sel-opts li:hover   { background: var(--gold-dim); color: var(--t1); }
+    .sel-opts li.chosen  { background: rgba(200,168,75,0.12); color: var(--gold-lt); font-weight: 500; }
+    .sel-opts li img     { width: 18px; height: 12px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+    .sel-opts::-webkit-scrollbar { width: 3px; }
+    .sel-opts::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 3px; }
+    .sel-opts::-webkit-scrollbar-track { background: transparent; }
+
+    .swap-col { display: flex; align-items: center; justify-content: center; }
+    .swap-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--line); background: rgba(255,255,255,0.038);
+      color: var(--gold); font-size: 0.78rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background var(--tm) var(--ease), box-shadow var(--tm) var(--ease), border-color var(--tm) var(--ease);
+      -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+    }
+    .swap-btn:hover { background: var(--gold-dim); border-color: var(--gold-border); box-shadow: 0 0 14px var(--gold-glow); }
+    .swap-btn.spinning { animation: spinHalf 0.34s var(--ease) forwards; }
+    @keyframes spinHalf { from { transform: rotate(0); } to { transform: rotate(180deg); } }
+
+    /* ── Convert Button ── */
+    .convert-btn {
+      position: relative; overflow: hidden; width: 100%; min-height: 54px;
+      border: none; border-radius: var(--r-btn);
+      background: linear-gradient(112deg, #a8781e 0%, #e0c06e 42%, #c8a84b 68%, #7e5c18 100%);
+      background-size: 200% 100%;
+      color: #140e00; font-family: var(--sans); font-size: 0.92rem; font-weight: 600; letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background-position 0.5s var(--ease), box-shadow var(--tm) var(--ease), transform var(--tf) var(--ease);
+      -webkit-tap-highlight-color: transparent; margin-bottom: 13px;
+      box-shadow: 0 4px 20px rgba(200,168,75,0.22);
+    }
+    .convert-btn:hover {
+      background-position: 100% 0;
+      box-shadow: 0 8px 30px rgba(200,168,75,0.35); transform: translateY(-1px);
+    }
+    .convert-btn:active { transform: translateY(0); box-shadow: 0 2px 12px rgba(200,168,75,0.20); }
+    .convert-btn::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.28) 50%, transparent 75%);
+      transform: translateX(-100%);
+    }
+    .convert-btn.converting::after { animation: btnShimmer 0.65s var(--ease) forwards; }
+    @keyframes btnShimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+    .btn-spinner {
+      display: none; width: 15px; height: 15px;
+      border: 2px solid rgba(20,14,0,0.22); border-top-color: #140e00;
+      border-radius: 50%; animation: spin 0.55s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .convert-btn.loading .btn-spinner { display: inline-block; }
+    .convert-btn.loading .btn-label   { opacity: 0.65; }
+    .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* ── Result Panel — digital dashboard display ── */
+    .result-panel {
+      border-radius: 13px;
+      background: var(--mint-dim); border: 1px solid var(--mint-border);
+      padding: 18px 14px; text-align: center;
+      min-height: 82px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      transition: background var(--tm) var(--ease), border-color var(--tm) var(--ease), box-shadow var(--tm) var(--ease);
+      position: relative; overflow: hidden;
+    }
+    .result-panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(80,212,168,0.4), transparent);
+      opacity: 0; transition: opacity var(--tm);
+    }
+    .result-panel.lit { background: rgba(80,212,168,0.065); border-color: rgba(80,212,168,0.26); box-shadow: 0 0 28px rgba(80,212,168,0.07); }
+    .result-panel.lit::before { opacity: 1; }
+
+    .result-value {
+      font-family: var(--mono);
+      font-size: clamp(1.6rem, 8vw, 2.7rem);
+      font-weight: 600; line-height: 1.05; letter-spacing: -0.5px;
+      background: linear-gradient(115deg, var(--t1) 0%, var(--mint) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      animation: resultPop 0.36s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes resultPop {
+      from { opacity: 0; transform: scale(0.84) translateY(8px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
+    .result-sub  { font-family: var(--mono); font-size: 0.7rem; color: var(--t2); }
+    .result-hint { font-size: 0.78rem; color: var(--t3); line-height: 1.6; }
+
+    .err-msg { min-height: 14px; margin-top: 7px; font-size: 0.73rem; font-weight: 500; color: #e87272; text-align: center; }
+
+    .timestamp {
+      display: none; align-items: center; justify-content: center;
+      gap: 5px; margin-top: 9px; font-size: 0.62rem; color: var(--t3);
+    }
+    .timestamp i { font-size: 0.58rem; }
+
+    /* ================================================================
+       POPULAR PAIRS — 2×3 Grid (FIXED, no horizontal scroll)
+       At 393px: 18px padding each side → 357px available
+       2 cols with 10px gap → each col = (357 - 10) / 2 = 173.5px — perfect
+    ================================================================ */
+    .pairs-section { padding: 0 0 env(safe-area-inset-bottom, 24px); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+    .pairs-wrap    { max-width: 430px; margin-inline: auto; padding: 14px 18px 0; }
+
+    .pairs-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 13px; gap: 8px;
+    }
+    .pairs-title {
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 1.4px;
+      text-transform: uppercase; color: var(--t3);
+    }
+    .pairs-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.6rem; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-border);
+      border-radius: 20px; padding: 2px 9px;
+    }
+
+    /* THE FIX: 2-column grid, no scroll, guaranteed full visibility */
+    .pairs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      /* Ensure last row (3rd pair in row 2) is also fully visible */
+      width: 100%;
+    }
+
+    .pair-card {
+      background: rgba(13,17,38,0.72);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 14px 12px 13px;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+      transition: transform var(--tm) var(--ease), background var(--tm) var(--ease),
+                  border-color var(--tm) var(--ease), box-shadow var(--tm) var(--ease);
+      animation: slideUp 0.48s var(--ease) both;
+      position: relative; overflow: hidden;
+    }
+    .pair-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200,168,75,0.25), transparent);
+      opacity: 0; transition: opacity var(--tm);
+    }
+    .pair-card:nth-child(1) { animation-delay: 0.15s; }
+    .pair-card:nth-child(2) { animation-delay: 0.22s; }
+    .pair-card:nth-child(3) { animation-delay: 0.29s; }
+    .pair-card:nth-child(4) { animation-delay: 0.36s; }
+    .pair-card:nth-child(5) { animation-delay: 0.43s; }
+    .pair-card:nth-child(6) { animation-delay: 0.50s; }
+
+    .pair-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold-border);
+      background: rgba(200,168,75,0.042);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.38), 0 0 0 1px rgba(200,168,75,0.1) inset;
+    }
+    .pair-card:hover::before { opacity: 1; }
+
+    .pair-top { display: flex; align-items: center; gap: 5px; margin-bottom: 9px; width: 100%; }
+    .pair-flags { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+    .pair-flags img { width: 18px; height: 12px; object-fit: cover; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+    .pair-flags .sep { font-size: 0.5rem; color: var(--t3); }
+
+    .pair-name {
+      font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
+      color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .pair-rate {
+      font-family: var(--mono); font-size: 1.05rem; font-weight: 600;
+      color: var(--gold-lt); line-height: 1;
+      background: linear-gradient(110deg, var(--gold-lt) 0%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .pair-rate.skel { color: var(--t3); -webkit-text-fill-color: var(--t3); background: none; }
+
+    .pair-label {
+      font-size: 0.58rem; color: var(--t3); letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .pair-arrow {
+      position: absolute; top: 12px; right: 11px;
+      font-size: 0.55rem; color: var(--t3);
+      transition: color var(--tm), transform var(--tm);
+    }
+    .pair-card:hover .pair-arrow { color: var(--gold); transform: translate(1px, -1px); }
+
+    /* ================================================================
+       STATS STRIP — between hero and converter
+    ================================================================ */
+    .stats-strip {
+      max-width: 430px; margin-inline: auto;
+      padding: 0 18px 16px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .stat-item {
+      background: rgba(255,255,255,0.026);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 10px 9px;
+      text-align: center;
+      animation: slideUp 0.5s 0.05s var(--ease) both;
+    }
+    .stat-num {
+      font-family: var(--mono); font-size: 0.95rem; font-weight: 600;
+      color: var(--gold-lt); line-height: 1;
+    }
+    .stat-txt { font-size: 0.58rem; color: var(--t3); margin-top: 3px; letter-spacing: 0.3px; line-height: 1.3; }
+
+    /* ================================================================
+       FOOTER
+    ================================================================ */
+    footer {
+      border-top: 1px solid var(--line);
+      background: rgba(7,8,16,0.88);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    }
+    .footer-inner {
+      max-width: 430px; margin-inline: auto;
+      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .footer-copy { font-size: 0.63rem; color: var(--t3); }
+
+    .socials { display: flex; gap: 7px; }
+    .socials a {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--input-bg); border: 1px solid var(--line);
+      color: var(--t3); display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; text-decoration: none;
+      transition: color var(--tm), background var(--tm), border-color var(--tm), transform var(--tm);
+    }
+    .socials a:hover { color: var(--gold); background: var(--gold-dim); border-color: var(--gold-border); transform: translateY(-2px); }
+
+    /* ── Shared animation ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 360px) {
+      .hero         { padding: 20px 14px 10px; }
+      .hero h1      { font-size: 1.5rem; }
+      .card         { padding: 16px 13px 14px; }
+      .currency-row { grid-template-columns: 1fr 38px 1fr; gap: 6px; }
+      .sel-trigger  { padding: 0 9px; }
+      .amount-input { font-size: 1rem; }
+      .result-value { font-size: 1.45rem; }
+      .pairs-grid   { gap: 8px; }
+      .pair-card    { padding: 12px 10px 11px; }
+      .pair-rate    { font-size: 0.9rem; }
+    }
+    @media (min-width: 430px) {
+      .hero h1   { font-size: 2rem; }
+      .hero      { padding: 30px 20px 14px; }
+      .card      { padding: 24px 20px 22px; }
+    }
+    @media (min-width: 600px) {
+      .hero              { padding: 46px 20px 20px; }
+      .hero h1           { font-size: 2.45rem; }
+      .converter-section { padding: 14px 24px 30px; }
+      .card              { padding: 26px 24px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-a" aria-hidden="true"></div>
+  <div class="orb orb-b" aria-hidden="true"></div>
+  <div class="orb orb-c" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+  <header role="banner">
+    <div class="header-inner">
+      <a class="logo-link" href="#" aria-label="GlobeX — Precision Currency Intelligence">
+        <img src="../image/logo.png" alt="GlobeX logo" width="28" height="28" />
+        <span class="brand">Globe<span>X</span></span>
+      </a>
+      <div class="live-pill" aria-label="Market-leading rates active">
+        <span class="pulse" aria-hidden="true"></span>
+        Market-Leading Rates
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ════════════ HERO ════════════ -->
+    <section class="hero" aria-labelledby="h1">
+      <div class="hero-tag">
+        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+        170+ Currencies · Institutional Precision
+      </div>
+      <h1 id="h1">Capital Moves Without<br /><em>Boundaries</em></h1>
+      <p class="hero-sub">
+        Bank-grade intelligence. Zero compromise.<br />
+        The platform elite traders rely on.
+      </p>
+    </section>
+
+    <!-- ════════════ STATS STRIP ════════════ -->
+    <div class="stats-strip" aria-label="Platform statistics">
+      <div class="stat-item">
+        <div class="stat-num">170+</div>
+        <div class="stat-txt">Global Currencies</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">24/7</div>
+        <div class="stat-txt">Live Rate Feeds</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0.01%</div>
+        <div class="stat-txt">Rate Precision</div>
+      </div>
+    </div>
+
+    <!-- ════════════ CONVERTER CARD ════════════ -->
+    <section class="converter-section" aria-label="Precision Currency Converter">
+      <div class="wrap" style="padding-inline:0;">
+        <div class="card" id="converter">
+
+          <!-- Card header -->
+          <div class="card-head">
+            <div class="card-brand">
+              <img src="../image/logo.png" alt="GlobeX" width="22" height="22" />
+              <span class="card-brand-name">Globe<span>X</span></span>
+            </div>
+            <div class="rate-pill" id="rate-pill" aria-live="polite">Calibrating…</div>
+          </div>
+
+          <!-- Amount -->
+          <div class="amount-group">
+            <label class="f-label" for="amount">You Dispatch</label>
+            <div class="amount-wrap">
+              <input
+                type="number" id="amount" class="amount-input"
+                value="100" min="0" step="any" placeholder="0.00"
+                inputmode="decimal" aria-label="Amount to convert"
+              />
+              <span class="amount-badge" id="amt-badge" aria-hidden="true">USD</span>
+            </div>
+          </div>
+
+          <!-- Currency row -->
+          <div class="currency-row">
+
+            <!-- FROM -->
+            <div>
+              <label class="f-label">Origin</label>
+              <div class="csel-wrap" id="from-wrap">
+                <div class="sel-trigger" id="from-trig" data-value="USD"
+                  role="button" tabindex="0" aria-haspopup="listbox"
+                  aria-expanded="false" aria-label="Select source currency">
+                  <img class="flag" id="from-flag" src="" alt="" width="20" height="14" />
+                  <span class="code" id="from-code">USD</span>
+                  <i class="fa-solid fa-chevron-down arrow" aria-hidden="true"></i>
+                </div>
+                <ul class="sel-opts" id="from-opts" role="listbox" aria-label="Source currencies"></ul>
+                <select id="from-sel" class="currency-select" aria-hidden="true" tabindex="-1"></select>
+              </div>
+            </div>
+
+            <!-- Swap -->
+            <div class="swap-col">
+              <button class="swap-btn" id="swap-btn"
+                aria-label="Swap currencies" title="Swap currencies">
+                <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <!-- TO -->
+            <div>
+              <label class="f-label">Destination</label>
+              <div class="csel-wrap" id="to-wrap">
+                <div class="sel-trigger" id="to-trig" data-value="PKR"
+                  role="button" tabindex="0" aria-haspopup="listbox"
+                  aria-expanded="false" aria-label="Select target currency">
+                  <img class="flag" id="to-flag" src="" alt="" width="20" height="14" />
+                  <span class="code" id="to-code">PKR</span>
+                  <i class="fa-solid fa-chevron-down arrow" aria-hidden="true"></i>
+                </div>
+                <ul class="sel-opts" id="to-opts" role="listbox" aria-label="Target currencies"></ul>
+                <select id="to-sel" class="currency-select" aria-hidden="true" tabindex="-1"></select>
+              </div>
+            </div>
+
+          </div><!-- /currency-row -->
+
+          <!-- Convert button -->
+          <button class="convert-btn" id="convert-btn">
+            <span class="btn-inner">
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+              <span class="btn-label">Execute Conversion</span>
+            </span>
+          </button>
+
+          <!-- Result panel -->
+          <div class="result-panel" id="result-panel"
+            role="status" aria-live="polite" aria-atomic="true">
+            <span class="result-hint">Enter an amount and execute</span>
+          </div>
+
+          <!-- Error -->
+          <div class="err-msg" id="err-msg" role="alert" aria-live="assertive"></div>
+
+          <!-- Timestamp -->
+          <div class="timestamp" id="timestamp">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <span id="ts-text">—</span>
+          </div>
+
+        </div><!-- /card -->
+      </div>
+    </section>
+
+    <!-- ════════════ MARKET PULSE PAIRS ════════════ -->
+    <section class="pairs-section" aria-label="Market pulse — live currency pairs">
+      <div class="pairs-wrap">
+        <div class="pairs-header">
+          <span class="pairs-title">Market Pulse</span>
+          <span class="pairs-badge">
+            <span class="pulse" style="width:4px;height:4px;" aria-hidden="true"></span>
+            Live · Tap to apply
+          </span>
+        </div>
+
+        <!-- 2-column grid — fully visible, zero overflow -->
+        <div class="pairs-grid" role="list">
+
+          <div class="pair-card" data-from="USD" data-to="EUR"
+            role="listitem" tabindex="0" aria-label="USD to EUR — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/US/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/EU/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">USD / EUR</div>
+            </div>
+            <div class="pair-rate skel" id="p-USD-EUR">—</div>
+            <div class="pair-label">Per 1 USD</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+          <div class="pair-card" data-from="USD" data-to="PKR"
+            role="listitem" tabindex="0" aria-label="USD to PKR — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/US/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/PK/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">USD / PKR</div>
+            </div>
+            <div class="pair-rate skel" id="p-USD-PKR">—</div>
+            <div class="pair-label">Per 1 USD</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+          <div class="pair-card" data-from="GBP" data-to="USD"
+            role="listitem" tabindex="0" aria-label="GBP to USD — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/GB/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/US/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">GBP / USD</div>
+            </div>
+            <div class="pair-rate skel" id="p-GBP-USD">—</div>
+            <div class="pair-label">Per 1 GBP</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+          <div class="pair-card" data-from="USD" data-to="JPY"
+            role="listitem" tabindex="0" aria-label="USD to JPY — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/US/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/JP/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">USD / JPY</div>
+            </div>
+            <div class="pair-rate skel" id="p-USD-JPY">—</div>
+            <div class="pair-label">Per 1 USD</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+          <div class="pair-card" data-from="EUR" data-to="GBP"
+            role="listitem" tabindex="0" aria-label="EUR to GBP — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/EU/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/GB/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">EUR / GBP</div>
+            </div>
+            <div class="pair-rate skel" id="p-EUR-GBP">—</div>
+            <div class="pair-label">Per 1 EUR</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+          <div class="pair-card" data-from="EUR" data-to="USD"
+            role="listitem" tabindex="0" aria-label="EUR to USD — tap to apply">
+            <div class="pair-top">
+              <div class="pair-flags" aria-hidden="true">
+                <img src="https://flagsapi.com/EU/flat/32.png" alt="" width="18" height="12" />
+                <span class="sep">/</span>
+                <img src="https://flagsapi.com/US/flat/32.png" alt="" width="18" height="12" />
+              </div>
+              <div class="pair-name">EUR / USD</div>
+            </div>
+            <div class="pair-rate skel" id="p-EUR-USD">—</div>
+            <div class="pair-label">Per 1 EUR</div>
+            <i class="fa-solid fa-arrow-up-right-from-square pair-arrow" aria-hidden="true"></i>
+          </div>
+
+        </div><!-- /pairs-grid -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ════════════ FOOTER ════════════ -->
+  <footer id="footer-section" role="contentinfo">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2025 GlobeX. Institutional-Grade Precision.</span>
+      <nav class="socials" aria-label="Social media">
+        <a href="#" title="Facebook"  aria-label="Facebook" ><i class="fab fa-facebook-f"  aria-hidden="true"></i></a>
+        <a href="#" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"   aria-hidden="true"></i></a>
+        <a href="#" title="LinkedIn"  aria-label="LinkedIn" ><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+        <a href="#" title="X"         aria-label="X/Twitter"><i class="fab fa-x-twitter"   aria-hidden="true"></i></a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+  'use strict';
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const API   = 'https://api.exchangerate-api.com/v4/latest/';
+    const DFROM = 'USD';
+    const DTO   = 'PKR';
+
+    const FM = {
+      AED:'AE',AFN:'AF',ALL:'AL',AMD:'AM',ANG:'AN',AOA:'AO',ARS:'AR',AUD:'AU',
+      AWG:'AW',AZN:'AZ',BAM:'BA',BBD:'BB',BDT:'BD',BGN:'BG',BHD:'BH',BMD:'BM',
+      BND:'BN',BOB:'BO',BRL:'BR',BSD:'BS',BTN:'BT',BWP:'BW',BYN:'BY',BZD:'BZ',
+      CAD:'CA',CDF:'CD',CHF:'CH',CLP:'CL',CNY:'CN',COP:'CO',CRC:'CR',CUP:'CU',
+      CVE:'CV',CZK:'CZ',DJF:'DJ',DKK:'DK',DOP:'DO',DZD:'DZ',EGP:'EG',ERN:'ER',
+      ETB:'ET',EUR:'EU',FJD:'FJ',FKP:'FK',GBP:'GB',GEL:'GE',GHS:'GH',GIP:'GI',
+      GMD:'GM',GNF:'GN',GTQ:'GT',GYD:'GY',HKD:'HK',HNL:'HN',HRK:'HR',HTG:'HT',
+      HUF:'HU',IDR:'ID',ILS:'IL',INR:'IN',IQD:'IQ',IRR:'IR',ISK:'IS',JMD:'JM',
+      JOD:'JO',JPY:'JP',KES:'KE',KGS:'KG',KHR:'KH',KMF:'KM',KRW:'KR',KWD:'KW',
+      KYD:'KY',KZT:'KZ',LAK:'LA',LBP:'LB',LKR:'LK',LRD:'LR',LSL:'LS',LYD:'LY',
+      MAD:'MA',MDL:'MD',MGA:'MG',MKD:'MK',MMK:'MM',MNT:'MN',MOP:'MO',MRU:'MR',
+      MUR:'MU',MVR:'MV',MWK:'MW',MXN:'MX',MYR:'MY',MZN:'MZ',NAD:'NA',NGN:'NG',
+      NIO:'NI',NOK:'NO',NPR:'NP',NZD:'NZ',OMR:'OM',PAB:'PA',PEN:'PE',PGK:'PG',
+      PHP:'PH',PKR:'PK',PLN:'PL',PYG:'PY',QAR:'QA',RON:'RO',RSD:'RS',RUB:'RU',
+      RWF:'RW',SAR:'SA',SBD:'SB',SCR:'SC',SDG:'SD',SEK:'SE',SGD:'SG',SHP:'SH',
+      SLL:'SL',SOS:'SO',SRD:'SR',STN:'ST',SYP:'SY',SZL:'SZ',THB:'TH',TJS:'TJ',
+      TMT:'TM',TND:'TN',TOP:'TO',TRY:'TR',TTD:'TT',TWD:'TW',TZS:'TZ',UAH:'UA',
+      UGX:'UG',USD:'US',UYU:'UY',UZS:'UZ',VES:'VE',VND:'VN',VUV:'VU',WST:'WS',
+      XAF:'CM',XCD:'AG',XOF:'SN',XPF:'PF',YER:'YE',ZAR:'ZA',ZMW:'ZM',ZWL:'ZW'
+    };
+
+    const flagUrl = c => FM[c] ? `https://flagsapi.com/${FM[c]}/flat/32.png` : '';
+    const fmt = (n, mn=2, mx=4) => n.toLocaleString(undefined, { minimumFractionDigits:mn, maximumFractionDigits:mx });
+
+    let rates = {}, rateReady = false, rateBase = null;
+
+    const fromSel  = document.getElementById('from-sel');
+    const toSel    = document.getElementById('to-sel');
+    const fromTrig = document.getElementById('from-trig');
+    const toTrig   = document.getElementById('to-trig');
+    const fromOpts = document.getElementById('from-opts');
+    const toOpts   = document.getElementById('to-opts');
+    const fromFlag = document.getElementById('from-flag');
+    const toFlag   = document.getElementById('to-flag');
+    const fromCode = document.getElementById('from-code');
+    const toCode   = document.getElementById('to-code');
+    const amtInput = document.getElementById('amount');
+    const amtBadge = document.getElementById('amt-badge');
+    const cvtBtn   = document.getElementById('convert-btn');
+    const swapBtn  = document.getElementById('swap-btn');
+    const resPanel = document.getElementById('result-panel');
+    const errMsg   = document.getElementById('err-msg');
+    const ratePill = document.getElementById('rate-pill');
+    const tsWrap   = document.getElementById('timestamp');
+    const tsText   = document.getElementById('ts-text');
+
+    function populate(ratesObj) {
+      const codes = Object.keys(ratesObj).sort();
+      [fromSel,toSel,fromOpts,toOpts].forEach(el => el.innerHTML = '');
+      codes.forEach(c => {
+        fromSel.add(new Option(c,c));
+        toSel.add(new Option(c,c));
+        fromOpts.appendChild(mkLi(c));
+        toOpts.appendChild(mkLi(c));
+      });
+    }
+
+    function mkLi(c) {
+      const li = document.createElement('li');
+      li.dataset.value = c; li.setAttribute('role','option');
+      const u = flagUrl(c);
+      if (u) {
+        const img = document.createElement('img');
+        img.src=u; img.alt=''; img.width=18; img.height=12; img.loading='lazy';
+        img.onerror = () => img.remove();
+        li.appendChild(img);
+      }
+      li.appendChild(document.createTextNode(c));
+      return li;
+    }
+
+    function setSel(side, code) {
+      const isFrom = side==='from';
+      const trig  = isFrom ? fromTrig : toTrig;
+      const sel   = isFrom ? fromSel  : toSel;
+      const opts  = isFrom ? fromOpts : toOpts;
+      const fEl   = isFrom ? fromFlag : toFlag;
+      const cEl   = isFrom ? fromCode : toCode;
+      sel.value = code;
+      trig.dataset.value = code;
+      cEl.textContent = code;
+      const u = flagUrl(code);
+      fEl.src = u || ''; fEl.alt = u ? code : ''; fEl.style.display = u ? '' : 'none';
+      opts.querySelectorAll('li').forEach(li => li.classList.toggle('chosen', li.dataset.value===code));
+      if (isFrom) amtBadge.textContent = code;
+      rateBase = null;
+    }
+
+    function openDrop(side) {
+      const tr = side==='from' ? fromTrig : toTrig;
+      const ul = side==='from' ? fromOpts : toOpts;
+      closeDrop(side==='from'?'to':'from');
+      tr.classList.add('open'); tr.setAttribute('aria-expanded','true'); ul.classList.add('active');
+      const ch = ul.querySelector('.chosen'); if (ch) ch.scrollIntoView({block:'nearest'});
+    }
+    function closeDrop(side) {
+      const tr = side==='from' ? fromTrig : toTrig;
+      const ul = side==='from' ? fromOpts : toOpts;
+      tr.classList.remove('open'); tr.setAttribute('aria-expanded','false'); ul.classList.remove('active');
+    }
+    function togDrop(side) {
+      (side==='from'?fromOpts:toOpts).classList.contains('active') ? closeDrop(side) : openDrop(side);
+    }
+
+    fromTrig.addEventListener('click', () => togDrop('from'));
+    toTrig.addEventListener('click',   () => togDrop('to'));
+
+    [[fromTrig,'from'],[toTrig,'to']].forEach(([el,s]) => {
+      el.addEventListener('keydown', e => {
+        if (e.key==='Enter'||e.key===' ') { e.preventDefault(); togDrop(s); }
+        if (e.key==='Escape') closeDrop(s);
+      });
+    });
+
+    fromOpts.addEventListener('click', e => {
+      const li = e.target.closest('li[data-value]');
+      if (li) { setSel('from',li.dataset.value); closeDrop('from'); refreshPill(); }
+    });
+    toOpts.addEventListener('click', e => {
+      const li = e.target.closest('li[data-value]');
+      if (li) { setSel('to',li.dataset.value); closeDrop('to'); refreshPill(); }
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#from-wrap')) closeDrop('from');
+      if (!e.target.closest('#to-wrap'))   closeDrop('to');
+    });
+
+    function refreshPill() {
+      if (!rateReady) return;
+      const r = rates[toSel.value];
+      if (r != null) ratePill.textContent = `1 ${fromSel.value} = ${fmt(r)} ${toSel.value}`;
+    }
+
+    async function fetchRates(base) {
+      rateReady = false; errMsg.textContent = '';
+      try {
+        const res  = await fetch(`${API}${base}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.rates||!data.base) throw new Error('Bad response');
+        rates = data.rates; rateBase = data.base; rateReady = true;
+        if (fromSel.options.length===0) { populate(data.rates); setSel('from',DFROM); setSel('to',DTO); }
+        refreshPill();
+        const now = new Date();
+        tsText.textContent = `Intelligence updated at ${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+        tsWrap.style.display = 'flex';
+        return true;
+      } catch(e) {
+        console.error('[GlobeX]',e);
+        errMsg.textContent='⚠ Unable to retrieve live rates. Check your connection.';
+        ratePill.textContent='Unavailable';
+        return false;
+      }
+    }
+
+    function calculate() {
+      const amount = parseFloat(amtInput.value);
+      const from   = fromSel.value;
+      const to     = toSel.value;
+      errMsg.textContent = '';
+      if (!amount||amount<=0||isNaN(amount)) {
+        errMsg.textContent='Enter a valid amount greater than zero.';
+        resetResult(); return;
+      }
+      if (!rateReady||rates[to]==null) {
+        errMsg.textContent=`Rate for ${to} unavailable. Retry momentarily.`; return;
+      }
+      const rate = rates[to], converted = amount * rate;
+      resPanel.classList.add('lit');
+      resPanel.innerHTML = `
+        <span class="result-value">${fmt(converted,2,4)}&thinsp;${to}</span>
+        <span class="result-sub">1&thinsp;${from}&nbsp;=&nbsp;${fmt(rate,4,6)}&thinsp;${to}</span>
+      `;
+      refreshPill();
+    }
+
+    function resetResult() {
+      resPanel.classList.remove('lit');
+      resPanel.innerHTML='<span class="result-hint">Enter an amount and execute</span>';
+    }
+
+    async function handleConvert() {
+      const base = fromSel.value;
+      cvtBtn.classList.add('converting','loading'); cvtBtn.disabled=true;
+      if (rateBase!==base||!rateReady) {
+        const ok = await fetchRates(base);
+        if (!ok) { cvtBtn.classList.remove('converting','loading'); cvtBtn.disabled=false; return; }
+      }
+      calculate();
+      setTimeout(() => { cvtBtn.classList.remove('converting','loading'); cvtBtn.disabled=false; }, 700);
+    }
+
+    cvtBtn.addEventListener('click', handleConvert);
+    amtInput.addEventListener('keydown', e => { if (e.key==='Enter') handleConvert(); });
+
+    swapBtn.addEventListener('click', () => {
+      const pf = fromSel.value, pt = toSel.value;
+      swapBtn.classList.remove('spinning');
+      void swapBtn.offsetWidth;
+      swapBtn.classList.add('spinning');
+      swapBtn.addEventListener('animationend', () => swapBtn.classList.remove('spinning'), {once:true});
+      setSel('from',pt); setSel('to',pf);
+      rateBase=null; resetResult(); errMsg.textContent='';
+    });
+
+    async function loadPairs() {
+      let usd=null, gbp=null, eur=null;
+      try { const r=await fetch(`${API}USD`); const d=await r.json(); usd=d.rates; } catch(_){}
+      try { const r=await fetch(`${API}GBP`); const d=await r.json(); gbp=d.rates; } catch(_){}
+      try { const r=await fetch(`${API}EUR`); const d=await r.json(); eur=d.rates; } catch(_){}
+
+      [
+        {id:'p-USD-EUR',from:'USD',to:'EUR',src:usd},
+        {id:'p-USD-PKR',from:'USD',to:'PKR',src:usd},
+        {id:'p-GBP-USD',from:'GBP',to:'USD',src:gbp},
+        {id:'p-USD-JPY',from:'USD',to:'JPY',src:usd},
+        {id:'p-EUR-GBP',from:'EUR',to:'GBP',src:eur},
+        {id:'p-EUR-USD',from:'EUR',to:'USD',src:eur},
+      ].forEach(({id,from,to,src}) => {
+        const el=document.getElementById(id); if (!el) return;
+        const r=src?src[to]:null;
+        el.textContent = r!=null ? fmt(r,2,4) : 'N/A';
+        el.classList.remove('skel');
+      });
+
+      document.querySelectorAll('.pair-card').forEach(card => {
+        const go = () => {
+          setSel('from',card.dataset.from); setSel('to',card.dataset.to);
+          rateBase=null; resetResult(); errMsg.textContent='';
+          document.getElementById('converter').scrollIntoView({behavior:'smooth',block:'center'});
+        };
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();go();} });
+      });
+    }
+
+    resetResult();
+    fetchRates(DFROM).then(() => { setSel('from',DFROM); setSel('to',DTO); });
+    loadPairs();
+
+  });
+  </script>
+</body>
+</html>
