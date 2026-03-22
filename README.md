@@ -19,7 +19,7 @@ A professional and responsive currency converter web application that allows use
 
 
 
-👉 **Live Demo:** [CLICK-ME](https://codewithaliyan.github.io/GlobeX-Converter/)
+👉 **Live Demo:** [CLICK-ME](https://BuildsByAliyan.github.io/GlobeX-Converter/)
 
 ---
 
@@ -47,7 +47,7 @@ _Add your project screenshots here (optional)._
 
 👤 **Aliyan**  
 📧 [connect.aliyansaleem@gmail.com]  
-🌐 [https://codewithaliyan.github.io]
+🌐 [https://BuildsByAliyan.github.io]
 
 ---
 
